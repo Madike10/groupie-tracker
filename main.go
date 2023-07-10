@@ -1,12 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 )
 
-type api struct {
+type ApiGroupie struct {
 	ID           int    `json:"id"`
 	IMAGES       string `json:images`
 	NAMES        string `json:names`
@@ -18,6 +18,8 @@ type api struct {
 	RELATIONS    string `json:relations`
 }
 
+var apiGroupie []ApiGroupie
+
 func GetApi(url string) {
 	responseBody, err := http.Get(url)
 	if err != nil {
@@ -25,18 +27,21 @@ func GetApi(url string) {
 	}
 	defer responseBody.Body.Close()
 
-	res, err := ioutil.ReadAll(responseBody.Body)
-	if err != nil {
+	// res, err := ioutil.ReadAll(responseBody.Body)
+	// if err != nil {
+	// 	fmt.Println("sdfrudiu")
+	// }
+	// for _, v := range res {
+	// 	fmt.Print(string(v))
+	// }
 
-		fmt.Println("sdfrudiu")
+	res := json.NewDecoder(responseBody.Body)
+	result := res.Decode(&apiGroupie)
+	if result != nil {
+		fmt.Println("error")
 	}
-
-	for _, v := range res {
-		fmt.Print(string(v))
-	}
-
+	fmt.Print(string(res))
 }
-
 func main() {
 	a := "https://groupietrackers.herokuapp.com/api/artists"
 	GetApi(a)
