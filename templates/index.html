@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <title>Groupie Tracker</title>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">Groupie &nbsp;Tracker</div>
+        <!-- <div class="search-bar">
+            <img src="../static/img/Vector.png" alt="icone" class="icon">
+        </div> -->
+    </header>
+    <div class="main-section">
+        <h1 class="text-artists">Artists In Our Groupie Tracker Website</h1>
+    </div>
+    <div class="artist-image">
+        {{range .}}
+        <div class="image" >
+            <a href="/artist?id={{.ID}}">
+                <img src="{{.IMAGE}}"class="image-groupe">
+                <p class="name" href="">{{ .NAME }}</p>
+            </a>
+        </div>
+        <div class="members">
+            <h2>Members :</h2>
+           
+            <ul>
+                {{ range $member := .MEMBERS }}
+                <li>{{ $member }}</li>
+                {{ end }}
+            </ul>
+                
+            
+            <h3>Creation Date : {{.CREATIONDATE}}</h3>
+            
+        </div>
+        {{end}}
+    </div>
+    
+</body>
+</html>
