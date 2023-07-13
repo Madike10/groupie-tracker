@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"text/template"
 )
 
@@ -20,7 +21,23 @@ type ApiGroupie struct {
 	RELATIONS    string   `json:"relations"`
 }
 
-var apiGroupie []ApiGroupie
+type NewApiGroupie struct {
+	ID           int
+	IMAGE        string
+	NAME         string
+	MEMBERS      []string
+	CREATIONDATE int
+	FIRSTALBUM   string
+	LOCATIONS    map[string]string
+	CONCERTDATES string
+	RELATIONS    string
+}
+
+var Groupie []ApiGroupie
+
+var newGroupie NewApiGroupie
+
+// Parcours de chaque élément de Groupie
 
 func GetApi(url string) {
 	responseBody, err := http.Get(url)
@@ -30,49 +47,35 @@ func GetApi(url string) {
 	defer responseBody.Body.Close()
 	// A ce niveau nous prenons les donées en json que l'on stocke au niveau de ApiGroupies
 	//qui est une instance de ApiGroupies
-	err = json.NewDecoder(responseBody.Body).Decode(&apiGroupie)
+	err = json.NewDecoder(responseBody.Body).Decode(&Groupie)
 
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	// traite des donner pour l'accueil
-
-	// for _, data := range apiGroupie {
-	// 	fmt.Println("ID", data.ID)
-	// 	fmt.Println("IMAGES", data.IMAGE)
-	// 	fmt.Println("NAMES", data.NAME)
-	// fmt.Println("MEMBERS", data.MEMBERS)
-	// 	fmt.Println("CRATIONDATE", data.CREATIONDATE)
-	// 	fmt.Println("FIRSTALBUM", data.FIRSTALBUM)
-	// 	fmt.Println("LOCATIONS", data.LOCATIONS)
-	// 	fmt.Println("CONCERTDATE", data.CONCERTDATES)
-	// 	fmt.Println("RELATIONS", data.RELATIONS)
-
-	// }
 }
 func HomePage(resp http.ResponseWriter, req *http.Request) {
 	template, _ := template.ParseFiles("./templates/index.html")
-	template.Execute(resp, apiGroupie)
+	template.Execute(resp, Groupie)
 
 }
 func ArtistPage(resp http.ResponseWriter, req *http.Request) {
 	template, _ := template.ParseFiles("./templates/artist.html")
+	val := req.URL.Query().Get("id")
+	fmt.Println(val)
+	for _, v := range Groupie {
+		a, _ := strconv.Atoi(val)
+		if v.ID == a {
 
-	// for _, v := range apiGroupie{
-	// 	a , _ := strconv.Atoi(id)
-	// 	if v.ID == a {
-	// 		v.NAME = N
-	// 	}
-	// }
+			newGroupie.NAME = v.NAME
+			newGroupie.MEMBERS = v.MEMBERS
+			newGroupie.IMAGE = v.IMAGE
+			newGroupie.CONCERTDATES = v.CONCERTDATES
+			newGroupie.FIRSTALBUM = v.FIRSTALBUM
+			newGroupie.CREATIONDATE = v.CREATIONDATE
+			newGroupie.LOCATIONS = v.LOCATIONS
+			newGroupie.RELATIONS = v.RELATIONS
 
-	template.Execute(resp, apiGroupie)
+		}
+	}
+	template.Execute(resp, newGroupie)
 }
-
-// res, err := ioutil.ReadAll(responseBody.Body)
-// if err != nil {
-// 	log.Fatal(err)
-// }
-// for _, v := range res {
-// 	fmt.Print(string(v))
-// }

@@ -7,22 +7,33 @@
     <title>Artists</title>
 </head>
 <body>
+    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Aspernatur et quis officia?</p>
     <div class="container">
-        <h1 class="name-artist">{{ .NAME }}</h1>
+        <h1 class="name-artist">{{.NAME}}</h1>
         <div class="groupe-details">
             <img src="{{.IMAGE}}" class="img-artist">
+           
             <div class="members">
                 <h2>Members :</h2>
+                <p>Name : {{.NAME}}</p>
                 <ul>
-                    {{ range $member := .MEMBERS }}
-                    <li>{{ $member }}</li>
+                    {{range $member := .MEMBERS}}
+                    <li>{{$member}}</li>
                     {{ end }}
                 </ul>
-                    <p>bonjour</p>
+                <h3>locations</h3>
+                <ul>
+                    {{range $l := .LOCATIONS}}
+                    <li>{{$l}}</li>
+                    {{ end }}
+                </ul>
+                
+                    <p>bonjour tt</p>
         
                 
                 <h3>Creation Date : {{.CREATIONDATE}}</h3>
             </div>
+         
         </div>
     </div>
 </body>

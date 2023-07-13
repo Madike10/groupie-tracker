@@ -8,7 +8,8 @@ import (
 func main() {
 	a := "https://groupietrackers.herokuapp.com/api/artists"
 	GetApi(a)
-
+    locations := "https://groupietrackers.herokuapp.com/api/locations"
+	GetApi(locations)
 	http.HandleFunc("/", HomePage)
 	http.HandleFunc("/artist/", ArtistPage)
 
