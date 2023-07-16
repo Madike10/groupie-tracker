@@ -1,26 +1,30 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"text/template"
 )
 
-type ApiGroupie struct {
-	ID           int      `json:"id"`
-	IMAGE        string   `json:"image"`
-	NAME         string   `json:"name"`
-	MEMBERS      []string `json:"members"`
-	CREATIONDATE int      `json:"creationDate"`
-	FIRSTALBUM   string   `json:"firstAlbum"`
-	LOCATIONS    string   `json:"locations"`
-	CONCERTDATES string   `json:"concertDates"`
-	RELATIONS    string   `json:"relations"`
+type ArtistAPI struct {
+	ID           int          `json:"id"`
+	IMAGE        string       `json:"image"`
+	NAME         string       `json:"name"`
+	MEMBERS      []string     `json:"members"`
+	CREATIONDATE int          `json:"creationDate"`
+	FIRSTALBUM   string       `json:"firstAlbum"`
+	LOCATIONS    LocationsAPI `json:"locations"`
+	CONCERTDATES string       `json:"concertDates"`
+	RELATIONS    string       `json:"relations"`
 }
 
+type LocationsAPI struct {
+	Id            int      `json:"id"`
+	Locations     []string `json:"locations"`
+	DateLocations int      `json:"dates"`
+}
 type NewApiGroupie struct {
 	ID           int
 	IMAGE        string
@@ -28,35 +32,24 @@ type NewApiGroupie struct {
 	MEMBERS      []string
 	CREATIONDATE int
 	FIRSTALBUM   string
-	LOCATIONS    map[string]string
+	LOCATIONS    LocationsAPI
 	CONCERTDATES string
 	RELATIONS    string
 }
 
-var Groupie []ApiGroupie
-
-var newGroupie NewApiGroupie
-
-// Parcours de chaque élément de Groupie
-
-func GetApi(url string) {
+func GetApi(url string) ([]byte, error) {
 	responseBody, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer responseBody.Body.Close()
-	// A ce niveau nous prenons les donées en json que l'on stocke au niveau de ApiGroupies
-	//qui est une instance de ApiGroupies
-	err = json.NewDecoder(responseBody.Body).Decode(&Groupie)
 
+	data, err := ioutil.ReadAll(responseBody.Body)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
-}
-func HomePage(resp http.ResponseWriter, req *http.Request) {
-	template, _ := template.ParseFiles("./templates/index.html")
-	template.Execute(resp, Groupie)
 
+	return data, nil
 }
 func ArtistPage(resp http.ResponseWriter, req *http.Request) {
 	template, _ := template.ParseFiles("./templates/artist.html")
@@ -65,7 +58,6 @@ func ArtistPage(resp http.ResponseWriter, req *http.Request) {
 	for _, v := range Groupie {
 		a, _ := strconv.Atoi(val)
 		if v.ID == a {
-
 			newGroupie.NAME = v.NAME
 			newGroupie.MEMBERS = v.MEMBERS
 			newGroupie.IMAGE = v.IMAGE
@@ -75,6 +67,17 @@ func ArtistPage(resp http.ResponseWriter, req *http.Request) {
 			newGroupie.LOCATIONS = v.LOCATIONS
 			newGroupie.RELATIONS = v.RELATIONS
 
+			// Récupérer les données depuis le lien "locations"
+			for _, locURL := range v.LOCATIONS.Locations {
+				locationsData, err := GetApi(locURL)
+				if err == nil {
+					// Ajouter les données de localisation à newGroupie
+					newGroupie.LOCATIONS.Locations = append(newGroupie.LOCATIONS.Locations, string(locationsData))
+					fmt.Println(newGroupie.LOCATIONS.Locations)
+				} else {
+					fmt.Println("Erreur lors de la récupération des données de localisation:", err)
+				}
+			}
 		}
 	}
 	template.Execute(resp, newGroupie)
